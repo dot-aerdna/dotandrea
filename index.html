@@ -3,10 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Andrea, data scientist e fotografo amatoriale.">
+  <meta name="description" content="Andrea, data scientist. Fotografia, Formula 1, simracing e videogiochi.">
   <meta name="theme-color" content="#0b1723">
   <title>Andrea - Data scientist</title>
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://dot-aerdna.github.io/dotandrea/">
+  <meta property="og:title" content="Andrea - Data scientist">
+  <meta property="og:description" content="Andrea, data scientist. Fotografia, Formula 1, simracing e videogiochi.">
+  <meta property="og:image" content="https://dot-aerdna.github.io/dotandrea/assets/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="preload" href="assets/fonts/newsreader-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="styles.css">
+  <script>try { const t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch {}</script>
   <script src="script.js" defer></script>
 </head>
 <body>
@@ -15,30 +27,33 @@
 
   <header class="site-header">
     <a class="mark" href="#home" aria-label="Andrea, torna all'inizio">Andrea</a>
+    <div class="header-controls">
+      <button class="theme-toggle pixel-link" type="button" aria-label="Tema: automatico" title="Tema">
+        <img class="icon" src="assets/icons/circle-half.svg" alt="" width="16" height="16">
+      </button>
+      <button class="effects-toggle pixel-link" type="button" aria-pressed="true" aria-label="Disattiva animazione" title="Animazione">
+        <img class="icon" src="assets/icons/pause.svg" alt="" width="16" height="16">
+      </button>
+    </div>
   </header>
 
   <main id="contenuto">
     <section class="hero" id="home" aria-labelledby="hero-title">
-      <video class="hero-photo" poster="assets/plant-shadows.webp" autoplay muted loop playsinline aria-hidden="true">
-        <source src="assets/plant-shadows.webm" type="video/webm">
-        <source src="assets/plant-shadows.mp4" type="video/mp4">
+      <video class="hero-photo" poster="assets/waterfall.webp" autoplay muted loop playsinline aria-hidden="true">
+        <source src="assets/waterfall.webm" type="video/webm">
+        <source src="assets/waterfall.mp4" type="video/mp4">
       </video>
       <div class="hero-tint" aria-hidden="true"></div>
 
       <div class="hero-copy">
-        <p class="hero-meta">Data scientist e fotografo amatoriale</p>
-        <h1 id="hero-title">Data science<br>e fotografia.</h1>
-        <p class="hero-intro">Sono Andrea. Lavoro con dati e modelli.</p>
+        <h1 id="hero-title">Dati, giri<br>e fotogrammi.</h1>
+        <p class="hero-intro">Sono Andrea. Lavoro con dati e modelli. Nel tempo libero fotografo, seguo la F1, corro al simulatore e gioco.</p>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
-    <p>Andrea, 2025</p>
     <div class="footer-links" aria-label="Collegamenti sociali">
-      <button class="effects-toggle pixel-link" type="button" aria-pressed="true" aria-label="Disattiva animazione" title="Effetti">
-        <img class="icon" src="assets/icons/leaf.svg" alt="" width="16" height="16">
-      </button>
       <a class="pixel-link" href="https://www.linkedin.com/in/andfio" target="_blank" rel="noreferrer" aria-label="LinkedIn" title="LinkedIn">
         <img class="icon" src="assets/icons/linkedin-logo.svg" alt="" width="16" height="16">
       </a>
