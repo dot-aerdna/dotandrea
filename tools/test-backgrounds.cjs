@@ -35,19 +35,29 @@ const original = Object.assign(element(), {
   play() { this.paused = false; return Promise.resolve(); },
   pause() { this.paused = true; },
 });
+const openClasses = new Set();
+const styleControl = Object.assign(element(), {
+  classList: { toggle(name, on) { if (on) openClasses.add(name); else openClasses.delete(name); } },
+  contains(target) { return target === style || target === intensity; },
+});
+const documentEvents = {};
+let pendingTimer = null;
 const root = path.resolve(__dirname, '..');
 vm.runInNewContext(fs.readFileSync(path.join(root, 'script.js'), 'utf8'), {
   document: {
     documentElement: { dataset: {} }, body: {},
+    addEventListener(name, handler) { documentEvents[name] = handler; },
     querySelector(selector) {
       return ({ '.hero-photo': video, '.hero-original': original, '.effects-toggle': effects,
         '.style-toggle': style, '#effect-intensity': intensity, '#intensity-value': intensityValue,
-        '.bw-toggle': bw, '.hero-background': background })[selector] ?? element();
+        '.bw-toggle': bw, '.hero-background': background, '.style-control': styleControl })[selector] ?? element();
     },
   },
   window: { matchMedia(query) { return query.includes('reduced-motion') ? reduced : element(); } },
   localStorage: { getItem() { return null; }, setItem() {} },
   getComputedStyle() { return { backgroundColor: '#0b1723' }; },
+  setTimeout(callback) { pendingTimer = callback; return 1; },
+  clearTimeout() { pendingTimer = null; },
 });
 
 function loaded() {
@@ -119,9 +129,29 @@ assert.equal(styleIcon.src, 'assets/icons/squares-four.svg');
 original.currentTime = 6;
 original.events.timeupdate();
 assert.equal(video.currentTime, 6, 'Correct drift between background layers');
+const iconBeforePress = styleIcon.src;
+style.events.pointerdown({ pointerType: 'touch' });
+pendingTimer();
+assert(openClasses.has('is-open'), 'Long press opens the intensity slider');
+style.events.pointerup();
+style.events.click();
+assert.equal(styleIcon.src, iconBeforePress, 'Long press does not change style');
+documentEvents.pointerdown({ target: intensity });
+assert(openClasses.has('is-open'), 'Touching the slider keeps it open');
+documentEvents.pointerdown({ target: {} });
+assert(!openClasses.has('is-open'), 'Touching elsewhere closes it');
+style.events.pointerdown({ pointerType: 'touch' });
+style.events.pointerup();
+assert.equal(pendingTimer, null, 'Short tap cancels the long press');
+style.events.click();
+assert.notEqual(styleIcon.src, iconBeforePress, 'Short tap still changes style');
+style.events.pointerdown({ pointerType: 'mouse' });
+assert.equal(pendingTimer, null, 'Mouse uses hover, not long press');
+documentEvents.keydown({ key: 'Escape' });
+
 assert(!classes.has('is-bw'), 'Colour by default');
 bw.events.click();
 assert(classes.has('is-bw') && bw.attributes['aria-pressed'] === true, 'Black and white on');
 bw.events.click();
 assert(!classes.has('is-bw') && bw.attributes['aria-pressed'] === false, 'Black and white off');
-console.log('OK: black and white, styles, intensity endpoints, per-style values, synchronization, rapid clicks, pause and reduced motion');
+console.log('OK: long press, black and white, styles, intensity endpoints, per-style values, synchronization, rapid clicks, pause and reduced motion');

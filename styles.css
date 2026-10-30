@@ -158,7 +158,7 @@
   .pixel-link:focus-visible::after { opacity: .5; }
   .pixel-link:active { transform: translate(1px, 1px); }
 
-  /* lo slider dell'intensità compare sotto l'icona dello stile solo con hover o focus da tastiera */
+  /* lo slider dell'intensità compare sotto l'icona dello stile: hover o focus da tastiera, pressione lunga sul telefono */
   .style-control { position: relative; }
   .intensity-control {
     position: absolute;
@@ -179,13 +179,25 @@
   }
   /* ponte invisibile sopra il pannello: il mouse passa dall'icona allo slider senza chiuderlo */
   .intensity-control::before { content: ""; position: absolute; inset: -.5rem 0 100%; }
-  .style-control:hover .intensity-control,
-  .style-control:focus-within .intensity-control {
+  .style-control.is-open .intensity-control {
     opacity: 1;
     visibility: visible;
     transform: translate(-50%, 0);
     transition-delay: 0s;
   }
+  /* solo dove esiste l'hover: sui touch il tocco lascerebbe il pannello aperto */
+  @media (hover: hover) {
+    .style-control:hover .intensity-control,
+    .style-control:focus-within .intensity-control {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, 0);
+      transition-delay: 0s;
+    }
+  }
+  /* pressione lunga sull'icona: niente selezione né menu "salva immagine" del telefono */
+  .style-toggle { -webkit-touch-callout: none; user-select: none; touch-action: manipulation; }
+  .style-toggle img { pointer-events: none; }
   .intensity-control output { min-width: 4ch; text-align: right; }
   .intensity-control input { width: clamp(4rem, 8vw, 6rem); height: .25rem; margin: 0; accent-color: var(--accent); cursor: pointer; }
   .intensity-control:has(input:disabled) > * { opacity: .45; }
@@ -262,7 +274,8 @@
   .header-controls { gap: .45rem; }
   .pixel-link { width: 2.5rem; height: 2.5rem; }
   /* su telefono resta solo il bottone dello stile: l'intensità usa i valori predefiniti */
-  .intensity-control { display: none; }
+  /* slider più largo per il dito */
+  .intensity-control input { width: 8rem; }
   /* il testo occupa tutta la larghezza: velo uniforme invece che da sinistra */
   .hero-tint { --tint-text: var(--tint-mobile); --tint-mid: var(--tint-mobile); --tint-edge: var(--tint-mobile); }
 

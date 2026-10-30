@@ -95,7 +95,40 @@ intensityControl.addEventListener('input', () => {
   syncIntensity();
 });
 
+// Senza hover (telefono) lo slider si apre con una pressione lunga sull'icona; un tocco normale cambia stile.
+const styleControl = document.querySelector('.style-control');
+let longPressTimer;
+let longPressed = false;
+
+function closeIntensity() {
+  styleControl.classList.toggle('is-open', false);
+}
+
+styleButton.addEventListener('pointerdown', event => {
+  if (event.pointerType === 'mouse') return;
+  longPressed = false;
+  longPressTimer = setTimeout(() => {
+    longPressed = true;
+    styleControl.classList.toggle('is-open', true);
+  }, 450);
+});
+for (const name of ['pointerup', 'pointercancel', 'pointerleave']) {
+  styleButton.addEventListener(name, () => clearTimeout(longPressTimer));
+}
+// niente menu contestuale del browser durante la pressione lunga
+styleButton.addEventListener('contextmenu', event => event.preventDefault());
+document.addEventListener('pointerdown', event => {
+  if (!styleControl.contains(event.target)) closeIntensity();
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') closeIntensity();
+});
+
 styleButton.addEventListener('click', () => {
+  if (longPressed) {
+    longPressed = false;
+    return;
+  }
   styleIndex = (styleIndex + 1) % backgroundStyles.length;
   const style = backgroundStyles[styleIndex];
   const next = backgroundStyles[(styleIndex + 1) % backgroundStyles.length];
