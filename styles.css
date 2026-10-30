@@ -195,9 +195,11 @@
       transition-delay: 0s;
     }
   }
-  /* pressione lunga sull'icona: niente selezione né menu "salva immagine" del telefono */
-  .style-toggle { -webkit-touch-callout: none; user-select: none; touch-action: manipulation; }
-  .style-toggle img { pointer-events: none; }
+  /* pressione lunga sull'icona: niente selezione, scroll o menu "salva immagine" del telefono, così il dito può trascinare */
+  .style-toggle { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; touch-action: none; }
+  .style-toggle img { pointer-events: none; transition: transform .12s; }
+  /* l'icona si stringe durante la pressione e torna di scatto quando il pannello si apre */
+  .style-control.is-pressing .style-toggle img { transform: scale(.75); transition: transform .45s ease-in; }
   .intensity-control output { min-width: 4ch; text-align: right; }
   .intensity-control input { width: clamp(4rem, 8vw, 6rem); height: .25rem; margin: 0; accent-color: var(--accent); cursor: pointer; }
   .intensity-control:has(input:disabled) > * { opacity: .45; }

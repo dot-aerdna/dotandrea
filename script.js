@@ -95,28 +95,61 @@ intensityControl.addEventListener('input', () => {
   syncIntensity();
 });
 
-// Senza hover (telefono) lo slider si apre con una pressione lunga sull'icona; un tocco normale cambia stile.
+// Senza hover (telefono): pressione lunga sull'icona apre lo slider, con una vibrazione dove il telefono la supporta.
+// Senza staccare il dito, trascinando a destra o a sinistra si regola l'intensità; staccandolo il pannello si chiude.
+// Un tocco normale cambia stile.
 const styleControl = document.querySelector('.style-control');
 let longPressTimer;
 let longPressed = false;
+let press = null;
 
 function closeIntensity() {
   styleControl.classList.toggle('is-open', false);
 }
 
+function endPress() {
+  clearTimeout(longPressTimer);
+  styleControl.classList.toggle('is-pressing', false);
+  if (press?.dragged) closeIntensity();
+  press = null;
+}
+
 styleButton.addEventListener('pointerdown', event => {
   if (event.pointerType === 'mouse') return;
   longPressed = false;
+  press = { x: event.clientX, y: event.clientY, value: intensityControl.valueAsNumber, dragged: false };
+  styleControl.classList.toggle('is-pressing', true);
   longPressTimer = setTimeout(() => {
     longPressed = true;
+    styleControl.classList.toggle('is-pressing', false);
     styleControl.classList.toggle('is-open', true);
+    navigator.vibrate?.(10);
   }, 450);
 });
-for (const name of ['pointerup', 'pointercancel', 'pointerleave']) {
-  styleButton.addEventListener(name, () => clearTimeout(longPressTimer));
-}
-// niente menu contestuale del browser durante la pressione lunga
+styleButton.addEventListener('pointermove', event => {
+  if (!press) return;
+  const dx = event.clientX - press.x;
+  if (!longPressed) {
+    // il dito si è spostato prima della pressione lunga: niente slider
+    if (Math.hypot(dx, event.clientY - press.y) > 10) {
+      clearTimeout(longPressTimer);
+      styleControl.classList.toggle('is-pressing', false);
+    }
+    return;
+  }
+  if (intensityControl.disabled) return;
+  press.dragged = true;
+  // tutta la larghezza dello slider = da 0 a 100%; il range limita da solo il valore
+  intensityControl.value = Math.round(press.value + dx / intensityControl.offsetWidth * 100);
+  intensityControl.dispatchEvent(new Event('input'));
+});
+styleButton.addEventListener('pointerup', endPress);
+styleButton.addEventListener('pointercancel', endPress);
+// niente menu contestuale né selezione del testo durante la pressione
 styleButton.addEventListener('contextmenu', event => event.preventDefault());
+document.addEventListener('selectstart', event => {
+  if (press) event.preventDefault();
+});
 document.addEventListener('pointerdown', event => {
   if (!styleControl.contains(event.target)) closeIntensity();
 });

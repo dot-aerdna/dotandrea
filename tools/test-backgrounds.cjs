@@ -15,7 +15,8 @@ function element() {
 const styleIcon = {};
 const style = Object.assign(element(), { querySelector() { return styleIcon; } });
 const intensity = Object.assign(element(), {
-  value: '50', disabled: false,
+  value: '50', disabled: false, offsetWidth: 100,
+  dispatchEvent(event) { this.events[event.type](); },
 });
 Object.defineProperty(intensity, 'valueAsNumber', { get() { return Number(this.value); } });
 const intensityValue = element();
@@ -42,6 +43,7 @@ const styleControl = Object.assign(element(), {
 });
 const documentEvents = {};
 let pendingTimer = null;
+let vibrations = 0;
 const root = path.resolve(__dirname, '..');
 vm.runInNewContext(fs.readFileSync(path.join(root, 'script.js'), 'utf8'), {
   document: {
@@ -56,6 +58,8 @@ vm.runInNewContext(fs.readFileSync(path.join(root, 'script.js'), 'utf8'), {
   window: { matchMedia(query) { return query.includes('reduced-motion') ? reduced : element(); } },
   localStorage: { getItem() { return null; }, setItem() {} },
   getComputedStyle() { return { backgroundColor: '#0b1723' }; },
+  navigator: { vibrate() { vibrations++; } },
+  Event: class { constructor(type) { this.type = type; } },
   setTimeout(callback) { pendingTimer = callback; return 1; },
   clearTimeout() { pendingTimer = null; },
 });
@@ -130,17 +134,34 @@ original.currentTime = 6;
 original.events.timeupdate();
 assert.equal(video.currentTime, 6, 'Correct drift between background layers');
 const iconBeforePress = styleIcon.src;
-style.events.pointerdown({ pointerType: 'touch' });
+style.events.pointerdown({ pointerType: 'touch', clientX: 0, clientY: 0 });
+assert(openClasses.has('is-pressing'), 'Icon reacts while pressing');
 pendingTimer();
-assert(openClasses.has('is-open'), 'Long press opens the intensity slider');
+assert(openClasses.has('is-open') && !openClasses.has('is-pressing'), 'Long press opens the intensity slider');
+assert.equal(vibrations, 1, 'Long press vibrates');
 style.events.pointerup();
+assert(openClasses.has('is-open'), 'Lifting without dragging keeps the slider open');
 style.events.click();
 assert.equal(styleIcon.src, iconBeforePress, 'Long press does not change style');
 documentEvents.pointerdown({ target: intensity });
 assert(openClasses.has('is-open'), 'Touching the slider keeps it open');
 documentEvents.pointerdown({ target: {} });
 assert(!openClasses.has('is-open'), 'Touching elsewhere closes it');
-style.events.pointerdown({ pointerType: 'touch' });
+const beforeDrag = intensity.valueAsNumber;
+style.events.pointerdown({ pointerType: 'touch', clientX: 50, clientY: 0 });
+pendingTimer();
+style.events.pointermove({ clientX: 20, clientY: 30 });
+assert.equal(intensity.valueAsNumber, beforeDrag - 30, 'Dragging after a long press sets the intensity');
+assert.equal(video.style.opacity, (beforeDrag - 30) / 100, 'Dragged intensity reaches the video');
+style.events.pointerup();
+style.events.click();
+assert(!openClasses.has('is-open'), 'Lifting after a drag closes the slider');
+assert.equal(styleIcon.src, iconBeforePress, 'Long press and drag do not change style');
+style.events.pointerdown({ pointerType: 'touch', clientX: 0, clientY: 0 });
+style.events.pointermove({ clientX: 0, clientY: 20 });
+assert.equal(pendingTimer, null, 'Moving before the long press cancels it');
+style.events.pointerup();
+style.events.pointerdown({ pointerType: 'touch', clientX: 0, clientY: 0 });
 style.events.pointerup();
 assert.equal(pendingTimer, null, 'Short tap cancels the long press');
 style.events.click();
@@ -154,4 +175,4 @@ bw.events.click();
 assert(classes.has('is-bw') && bw.attributes['aria-pressed'] === true, 'Black and white on');
 bw.events.click();
 assert(!classes.has('is-bw') && bw.attributes['aria-pressed'] === false, 'Black and white off');
-console.log('OK: long press, black and white, styles, intensity endpoints, per-style values, synchronization, rapid clicks, pause and reduced motion');
+console.log('OK: long press and drag, black and white, styles, intensity endpoints, per-style values, synchronization, rapid clicks, pause and reduced motion');
