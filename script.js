@@ -73,10 +73,10 @@ const styleButton = document.querySelector('.style-toggle');
 const intensityControl = document.querySelector('#effect-intensity');
 const intensityValue = document.querySelector('#intensity-value');
 const backgroundStyles = [
-  { label: 'ASCII', file: 'waterfall-ascii', intensity: 50 },
-  { label: 'Pixel', file: 'waterfall-pixel', intensity: 60 },
-  { label: 'Retino', file: 'waterfall-halftone', intensity: 25 },
-  { label: 'Originale', file: 'waterfall', intensity: 0 },
+  { label: 'ASCII', file: 'waterfall-ascii', icon: 'text-aa', intensity: 50 },
+  { label: 'Pixel', file: 'waterfall-pixel', icon: 'squares-four', intensity: 60 },
+  { label: 'Retino', file: 'waterfall-halftone', icon: 'dots-nine', intensity: 25 },
+  { label: 'Originale', file: 'waterfall', icon: 'image', intensity: 0 },
 ];
 let styleIndex = 0;
 let changingStyle = false;
@@ -99,7 +99,7 @@ styleButton.addEventListener('click', () => {
   styleIndex = (styleIndex + 1) % backgroundStyles.length;
   const style = backgroundStyles[styleIndex];
   const next = backgroundStyles[(styleIndex + 1) % backgroundStyles.length];
-  styleButton.textContent = style.label;
+  styleButton.querySelector('img').src = `assets/icons/${style.icon}.svg`;
   const label = `Effetto: ${style.label}. Passa a ${next.label}`;
   styleButton.setAttribute('aria-label', label);
   styleButton.title = label;

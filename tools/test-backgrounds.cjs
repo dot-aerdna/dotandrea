@@ -12,7 +12,8 @@ function element() {
   };
 }
 
-const style = element();
+const styleIcon = {};
+const style = Object.assign(element(), { querySelector() { return styleIcon; } });
 const intensity = Object.assign(element(), {
   value: '50', disabled: false,
 });
@@ -59,14 +60,15 @@ function loaded() {
   assert(fs.existsSync(path.join(root, video.poster)), 'Selected poster exists');
 }
 
-for (const [label, file, next] of [
-  ['Pixel', 'waterfall-pixel', 'Retino'],
-  ['Retino', 'waterfall-halftone', 'Originale'],
-  ['Originale', 'waterfall', 'ASCII'],
-  ['ASCII', 'waterfall-ascii', 'Pixel'],
+for (const [label, file, next, icon] of [
+  ['Pixel', 'waterfall-pixel', 'Retino', 'squares-four'],
+  ['Retino', 'waterfall-halftone', 'Originale', 'dots-nine'],
+  ['Originale', 'waterfall', 'ASCII', 'image'],
+  ['ASCII', 'waterfall-ascii', 'Pixel', 'text-aa'],
 ]) {
   style.events.click();
-  assert.equal(style.textContent, label);
+  assert.equal(styleIcon.src, `assets/icons/${icon}.svg`);
+  assert(fs.existsSync(path.join(root, styleIcon.src)), 'Style icon exists');
   if (label !== 'Originale') assert.equal(video.src, `assets/${file}.mp4`);
   assert.equal(style.attributes['aria-label'], `Effetto: ${label}. Passa a ${next}`);
   if (label !== 'Originale') loaded();
@@ -95,7 +97,7 @@ assert.equal(video.style.opacity, 1, 'Per-style intensity survives cycling');
 style.events.click();
 style.events.click();
 loaded();
-assert.equal(style.textContent, 'Originale', 'Rapid clicks select the latest style');
+assert.equal(styleIcon.src, 'assets/icons/image.svg', 'Rapid clicks select the latest style');
 
 effects.events.click();
 assert(video.paused);
@@ -112,7 +114,7 @@ style.events.click();
 loaded();
 assert(video.paused, 'Changing style respects reduced motion');
 assert(original.paused, 'Reduced motion pauses both layers');
-assert.equal(style.textContent, 'Pixel');
+assert.equal(styleIcon.src, 'assets/icons/squares-four.svg');
 
 original.currentTime = 6;
 original.events.timeupdate();

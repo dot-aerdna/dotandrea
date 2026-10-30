@@ -27,13 +27,17 @@
   <div class="noise" aria-hidden="true"></div>
 
   <header class="site-header">
-    <a class="mark" href="#home" aria-label="Andrea, torna all'inizio">Andrea</a>
+    <a class="mark" href="#home" aria-label="Andrea, torna all'inizio">aerdnA</a>
     <div class="header-controls">
-      <button class="style-toggle pixel-link" type="button" aria-label="Effetto: ASCII. Passa a Pixel" title="Effetto: ASCII. Passa a Pixel">ASCII</button>
-      <label class="intensity-control" for="effect-intensity">
-        <input id="effect-intensity" type="range" min="0" max="100" step="1" value="50" aria-label="Intensità effetto">
-        <output id="intensity-value" for="effect-intensity">50%</output>
-      </label>
+      <div class="style-control">
+        <button class="style-toggle pixel-link" type="button" aria-label="Effetto: ASCII. Passa a Pixel" title="Effetto: ASCII. Passa a Pixel">
+          <img class="icon" src="assets/icons/text-aa.svg" alt="" width="16" height="16">
+        </button>
+        <label class="intensity-control" for="effect-intensity">
+          <input id="effect-intensity" type="range" min="0" max="100" step="1" value="50" aria-label="Intensità effetto">
+          <output id="intensity-value" for="effect-intensity">50%</output>
+        </label>
+      </div>
       <button class="bw-toggle pixel-link" type="button" aria-pressed="false" aria-label="Sfondo in bianco e nero" title="Bianco e nero">
         <img class="icon" src="assets/icons/drop-half.svg" alt="" width="16" height="16">
       </button>
