@@ -36,6 +36,7 @@ syncTheme();
 
 const effectsButton = document.querySelector('.effects-toggle');
 const heroVideo = document.querySelector('.hero-photo');
+const originalVideo = document.querySelector('.hero-original');
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 let effectsEnabled = true;
@@ -48,8 +49,14 @@ function syncEffects() {
   effectsButton.setAttribute('aria-label', `${effectsEnabled ? 'Disattiva' : 'Attiva'} animazione`);
   effectsButton.querySelector('img').src = `assets/icons/${effectsEnabled ? 'pause' : 'play'}.svg`;
 
-  if (!effectsEnabled || reducedMotion.matches) heroVideo.pause();
-  else heroVideo.play().catch(() => {});
+  if (!effectsEnabled || reducedMotion.matches) {
+    heroVideo.pause();
+    originalVideo.pause();
+  } else {
+    originalVideo.play().catch(() => {});
+    if (intensityControl.disabled) heroVideo.pause();
+    else heroVideo.play().catch(() => {});
+  }
 }
 
 effectsButton.addEventListener('click', () => {
@@ -61,4 +68,92 @@ effectsButton.addEventListener('click', () => {
 });
 
 reducedMotion.addEventListener('change', syncEffects);
+
+const styleButton = document.querySelector('.style-toggle');
+const intensityControl = document.querySelector('#effect-intensity');
+const intensityValue = document.querySelector('#intensity-value');
+const backgroundStyles = [
+  { label: 'ASCII', file: 'waterfall-ascii', intensity: 50 },
+  { label: 'Pixel', file: 'waterfall-pixel', intensity: 60 },
+  { label: 'Retino', file: 'waterfall-halftone', intensity: 25 },
+  { label: 'Originale', file: 'waterfall', intensity: 0 },
+];
+let styleIndex = 0;
+let changingStyle = false;
+
+function syncIntensity() {
+  const style = backgroundStyles[styleIndex];
+  intensityControl.disabled = style.file === 'waterfall';
+  intensityControl.value = style.intensity;
+  intensityControl.setAttribute('aria-valuetext', `${style.intensity}%`);
+  intensityValue.value = `${style.intensity}%`;
+  heroVideo.style.opacity = changingStyle ? 0 : style.intensity / 100;
+}
+
+intensityControl.addEventListener('input', () => {
+  backgroundStyles[styleIndex].intensity = intensityControl.valueAsNumber;
+  syncIntensity();
+});
+
+styleButton.addEventListener('click', () => {
+  styleIndex = (styleIndex + 1) % backgroundStyles.length;
+  const style = backgroundStyles[styleIndex];
+  const next = backgroundStyles[(styleIndex + 1) % backgroundStyles.length];
+  styleButton.textContent = style.label;
+  const label = `Effetto: ${style.label}. Passa a ${next.label}`;
+  styleButton.setAttribute('aria-label', label);
+  styleButton.title = label;
+  changingStyle = true;
+  syncIntensity();
+  if (style.file === 'waterfall') {
+    changingStyle = false;
+    syncEffects();
+    return;
+  }
+  heroVideo.poster = `assets/${style.file}.webp`;
+  heroVideo.src = `assets/${style.file}.mp4`;
+  heroVideo.load();
+});
+
+heroVideo.addEventListener('loadedmetadata', () => {
+  if (!changingStyle) return;
+  heroVideo.currentTime = originalVideo.currentTime % heroVideo.duration;
+});
+
+heroVideo.addEventListener('loadeddata', () => {
+  changingStyle = false;
+  syncIntensity();
+  syncEffects();
+});
+
+originalVideo.addEventListener('timeupdate', () => {
+  if (!changingStyle && !intensityControl.disabled && !heroVideo.seeking && heroVideo.readyState >= 2 &&
+      Math.abs(heroVideo.currentTime - originalVideo.currentTime) > .1) {
+    heroVideo.currentTime = originalVideo.currentTime % heroVideo.duration;
+  }
+});
+
+syncIntensity();
 syncEffects();
+
+const bwButton = document.querySelector('.bw-toggle');
+const heroBackground = document.querySelector('.hero-background');
+let blackAndWhite = false;
+try {
+  blackAndWhite = localStorage.getItem('bw') === 'on';
+} catch {}
+
+function syncBlackAndWhite() {
+  bwButton.setAttribute('aria-pressed', blackAndWhite);
+  heroBackground.classList.toggle('is-bw', blackAndWhite);
+}
+
+bwButton.addEventListener('click', () => {
+  blackAndWhite = !blackAndWhite;
+  try {
+    localStorage.setItem('bw', blackAndWhite ? 'on' : 'off');
+  } catch {}
+  syncBlackAndWhite();
+});
+
+syncBlackAndWhite();

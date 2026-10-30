@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="styles.css">
   <script>try { const t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch {}</script>
   <script src="script.js" defer></script>
+  <script src="vhs.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#contenuto">Vai al contenuto</a>
@@ -28,6 +29,14 @@
   <header class="site-header">
     <a class="mark" href="#home" aria-label="Andrea, torna all'inizio">Andrea</a>
     <div class="header-controls">
+      <button class="style-toggle pixel-link" type="button" aria-label="Effetto: ASCII. Passa a Pixel" title="Effetto: ASCII. Passa a Pixel">ASCII</button>
+      <label class="intensity-control" for="effect-intensity">
+        <input id="effect-intensity" type="range" min="0" max="100" step="1" value="50" aria-label="Intensità effetto">
+        <output id="intensity-value" for="effect-intensity">50%</output>
+      </label>
+      <button class="bw-toggle pixel-link" type="button" aria-pressed="false" aria-label="Sfondo in bianco e nero" title="Bianco e nero">
+        <img class="icon" src="assets/icons/drop-half.svg" alt="" width="16" height="16">
+      </button>
       <button class="theme-toggle pixel-link" type="button" aria-label="Tema: automatico" title="Tema">
         <img class="icon" src="assets/icons/circle-half.svg" alt="" width="16" height="16">
       </button>
@@ -39,10 +48,10 @@
 
   <main id="contenuto">
     <section class="hero" id="home" aria-labelledby="hero-title">
-      <video class="hero-photo" poster="assets/waterfall.webp" autoplay muted loop playsinline aria-hidden="true">
-        <source src="assets/waterfall.webm" type="video/webm">
-        <source src="assets/waterfall.mp4" type="video/mp4">
-      </video>
+      <div class="hero-background" aria-hidden="true">
+        <video class="hero-original" src="assets/waterfall.mp4" poster="assets/waterfall.webp" autoplay muted loop playsinline data-vhs data-vhs-speed="1"></video>
+        <video class="hero-photo" src="assets/waterfall-ascii.mp4" poster="assets/waterfall-ascii.webp" autoplay muted loop playsinline data-vhs data-vhs-speed="1"></video>
+      </div>
       <div class="hero-tint" aria-hidden="true"></div>
 
       <div class="hero-copy">

@@ -27,6 +27,16 @@
     --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
     --noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
     color-scheme: light dark;
+    /* forza del velo sopra il video e opacità del video: in tema chiaro il video va attenuato di più */
+    --video-opacity: .85;
+    --tint-text: 82%;
+    --tint-mid: 45%;
+    --tint-edge: 50%;
+    --tint-mobile: 62%;
+  }
+  :root[data-theme="light"] { --video-opacity: .6; --tint-text: 86%; --tint-mid: 55%; --tint-edge: 58%; --tint-mobile: 72%; }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) { --video-opacity: .6; --tint-text: 86%; --tint-mid: 55%; --tint-edge: 58%; --tint-mobile: 72%; }
   }
   :root[data-theme="light"] { color-scheme: light; }
   :root[data-theme="dark"] { color-scheme: dark; }
@@ -115,8 +125,10 @@
   }
 
   .effects-toggle,
+  .style-toggle,
+  .bw-toggle,
   .theme-toggle { cursor: pointer; }
-  .header-controls { display: flex; align-items: flex-start; gap: .8rem; }
+  .header-controls { display: flex; align-items: center; gap: .8rem; }
   .footer-links { display: flex; align-items: center; gap: .8rem; }
 
   .pixel-link {
@@ -145,6 +157,28 @@
   .pixel-link:focus-visible::after { opacity: .5; }
   .pixel-link:active { transform: translate(1px, 1px); }
 
+  /* bordo sottile: si capisce che è un bottone e non un'etichetta */
+  .style-toggle {
+    width: auto;
+    min-width: 8.5rem;
+    padding-inline: .6rem;
+    border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+    letter-spacing: .05em;
+  }
+  .style-toggle::before { content: "Stile:"; margin-right: .6ch; opacity: .6; }
+
+  .intensity-control {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .65rem;
+  }
+  .intensity-control output { min-width: 4ch; text-align: right; }
+  .intensity-control input { width: clamp(4rem, 8vw, 6rem); height: .25rem; margin: 0; accent-color: var(--accent); cursor: pointer; }
+  .intensity-control:has(input:disabled) { opacity: .45; }
+
+  .bw-toggle[aria-pressed="true"] { background: light-dark(rgb(77 106 128 / .22), rgb(139 168 189 / .28)); }
+
   .icon { width: 1rem; height: 1rem; }
   /* le icone SVG sono chiare: in tema chiaro le invertiamo */
   :root[data-theme="light"] .icon { filter: invert(1); }
@@ -152,6 +186,8 @@
     :root:not([data-theme="dark"]) .icon { filter: invert(1); }
   }
 
+  .hero-background,
+  .hero-original,
   .hero-photo,
   .hero-tint {
     position: absolute;
@@ -160,19 +196,20 @@
     height: 100%;
   }
 
-  .hero-photo {
+  .hero-background {
     z-index: -2;
-    object-fit: cover;
-    opacity: .58;
-    filter: grayscale(1) contrast(1.12) brightness(.68);
-    mix-blend-mode: luminosity;
-    transform: scale(1.08);
+    opacity: var(--video-opacity);
   }
+  .hero-background.is-bw { filter: grayscale(1); }
+
+  .hero-original,
+  .hero-photo { object-fit: cover; }
 
   .hero-tint {
     z-index: -1;
     background:
-      linear-gradient(90deg, color-mix(in srgb, var(--bg) 88%, transparent) 0%, color-mix(in srgb, var(--bg) 45%, transparent) 52%, color-mix(in srgb, var(--bg) 68%, transparent) 100%),
+      linear-gradient(180deg, color-mix(in srgb, var(--bg) 65%, transparent), transparent 8rem),
+      linear-gradient(90deg, color-mix(in srgb, var(--bg) var(--tint-text), transparent) 0%, color-mix(in srgb, var(--bg) var(--tint-text), transparent) 30%, color-mix(in srgb, var(--bg) var(--tint-mid), transparent) 62%, color-mix(in srgb, var(--bg) var(--tint-edge), transparent) 100%),
       linear-gradient(0deg, color-mix(in srgb, var(--bg) 50%, transparent), transparent 55%);
   }
 
@@ -210,7 +247,12 @@
   .site-header::before { display: none; }
   .footer-links,
   .header-controls { gap: .45rem; }
-  .pixel-link { width: 1.85rem; height: 1.85rem; }
+  .pixel-link { width: 2.5rem; height: 2.5rem; }
+  .style-toggle { width: auto; min-width: 0; }
+  /* su telefono resta solo il bottone dello stile: l'intensità usa i valori predefiniti */
+  .intensity-control { display: none; }
+  /* il testo occupa tutta la larghezza: velo uniforme invece che da sinistra */
+  .hero-tint { --tint-text: var(--tint-mobile); --tint-mid: var(--tint-mobile); --tint-edge: var(--tint-mobile); }
 
   .hero {
     padding: 5rem 1.25rem;
@@ -228,10 +270,10 @@
     margin: 2rem 0 0;
   }
 
+  .hero-original,
   .hero-photo { object-position: 57% center; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: .01ms !important; }
-  .hero-photo { transform: scale(1.08); }
 }
